@@ -3,6 +3,7 @@ package com.ebay.codepath.mysettingsapp;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.apache.commons.io.IOUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,11 +41,37 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-       FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        // TODO Hack
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                try {
+                    Thread.currentThread().sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                String msg;
+                URL url = null;
+                try {
+                    url = new URL("http://www.google.com");
+                    URLConnection conn = url.openConnection();
+                    conn.connect();
+                    InputStream in = conn.getInputStream();
+
+                    String content = IOUtils.toString(in);
+
+                    msg = content.substring(0, 20);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    msg = "Error: " + e.getLocalizedMessage();
+                }
+
+                Snackbar.make(view, msg, Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
             }
         });
